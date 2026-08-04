@@ -30,7 +30,8 @@ const socialImage = new URL("/og.png", SITE.url);
     <meta name="description" content={description} />
     <meta name="theme-color" content="#f7f7f4" />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
 
     <meta property="og:type" content={type} />
@@ -53,10 +54,20 @@ const socialImage = new URL("/og.png", SITE.url);
           ? "dark"
           : "light";
         document.documentElement.dataset.theme = saved || preferred;
+
+        const readingTheme = localStorage.getItem("reading-theme");
+        if (
+          readingTheme &&
+          ["github", "newsprint", "academic", "minimal", "sepia", "night"].includes(
+            readingTheme,
+          )
+        ) {
+          document.documentElement.dataset.readingTheme = readingTheme;
+        }
       })();
     </script>
   </head>
-  <body>
+  <body class:list={{ "article-page": type === "article" }}>
     <a class="skip-link" href="#main-content">跳到正文</a>
     <Header />
     <main id="main-content">

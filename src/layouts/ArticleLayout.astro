@@ -1,17 +1,22 @@
 ---
 import type { Article } from "../lib/articles";
+import type { MarkdownHeading } from "astro";
 import { formatDate } from "../lib/articles";
 import BaseLayout from "./BaseLayout.astro";
 
 interface Props {
   article: Article;
+  headings: MarkdownHeading[];
 }
 
-const { article } = Astro.props;
+const { article, headings } = Astro.props;
 const updated =
   article.data.updated.valueOf() !== article.data.date.valueOf()
     ? formatDate(article.data.updated)
     : null;
+const tocHeadings = headings.filter(
+  (heading) => heading.depth >= 2 && heading.depth <= 4,
+);
 ---
 
 <BaseLayout
@@ -19,25 +24,74 @@ const updated =
   description={article.data.summary}
   type="article"
 >
-  <article class="article-shell">
-    <header class="article-header">
-      <a class="back-link" href="/articles/">← 全部文章</a>
-      <h1>{article.data.title}</h1>
-      <div class="article-meta">
-        <time datetime={article.data.date.toISOString()}>
-          发布于 {formatDate(article.data.date)}
-        </time>
-        {updated && <span>更新于 {updated}</span>}
-      </div>
-      <ul class="tag-list" aria-label="文章标签">
-        {article.data.tags.map((tag) => <li>{tag}</li>)}
-      </ul>
-    </header>
+  <div class="article-reader">
+    <article class="article-shell">
+      <header class="article-header">
+        <div class="article-toolbar">
+          <a class="back-link" href="/articles/">← 全部文章</a>
+          <label class="reading-theme-picker">
+            <span>阅读主题</span>
+            <select aria-label="选择文章阅读主题">
+              <option value="github">GitHub</option>
+              <option value="newsprint">Newsprint</option>
+              <option value="academic">Academic</option>
+              <option value="minimal">Minimal</option>
+              <option value="sepia">Sepia</option>
+              <option value="night">Night</option>
+            </select>
+          </label>
+        </div>
+        <h1>{article.data.title}</h1>
+        <div class="article-meta">
+          <time datetime={article.data.date.toISOString()}>
+            发布于 {formatDate(article.data.date)}
+          </time>
+          {updated && <span>更新于 {updated}</span>}
+        </div>
+        <ul class="tag-list" aria-label="文章标签">
+          {article.data.tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+      </header>
 
-    <div class="prose">
-      <slot />
-    </div>
-  </article>
+      {
+        tocHeadings.length > 0 && (
+          <details class="mobile-toc">
+            <summary>目录</summary>
+            <nav aria-label="文章目录">
+              <ol>
+                {tocHeadings.map((heading) => (
+                  <li class={`toc-depth-${heading.depth}`}>
+                    <a href={`#${heading.slug}`}>{heading.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </details>
+        )
+      }
+
+      <div class="prose">
+        <slot />
+      </div>
+    </article>
+
+    {
+      tocHeadings.length > 0 && (
+        <aside class="article-toc">
+          <p>目录</p>
+          <nav aria-label="文章目录">
+            <ol>
+              {tocHeadings.map((heading) => (
+                <li class={`toc-depth-${heading.depth}`}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </aside>
+      )
+    }
+  </div>
 
   <dialog class="image-viewer" aria-label="图片查看器">
     <button type="button" aria-label="关闭图片查看器">关闭</button>
@@ -66,6 +120,77 @@ const updated =
         });
         block.append(button);
       });
+    };
+
+    const setupReadingTheme = () => {
+      const select =
+        document.querySelector<HTMLSelectElement>(".reading-theme-picker select");
+      if (!select) return;
+
+      const allowed = [
+        "github",
+        "newsprint",
+        "academic",
+        "minimal",
+        "sepia",
+        "night",
+      ];
+      const current = document.documentElement.dataset.readingTheme || "github";
+      select.value = allowed.includes(current) ? current : "github";
+
+      select.addEventListener("change", () => {
+        const theme = allowed.includes(select.value) ? select.value : "github";
+        if (theme === "github") {
+          delete document.documentElement.dataset.readingTheme;
+          localStorage.removeItem("reading-theme");
+        } else {
+          document.documentElement.dataset.readingTheme = theme;
+          localStorage.setItem("reading-theme", theme);
+        }
+      });
+    };
+
+    const setupTableOfContents = () => {
+      const links = Array.from(
+        document.querySelectorAll<HTMLAnchorElement>(
+          ".article-toc a, .mobile-toc a",
+        ),
+      );
+      if (links.length === 0) return;
+
+      const headings = links
+        .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+        .filter((heading): heading is HTMLElement => Boolean(heading));
+
+      const setCurrent = (id: string) => {
+        links.forEach((link) => {
+          if (decodeURIComponent(link.hash.slice(1)) === id) {
+            link.setAttribute("aria-current", "location");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+      };
+
+      const updateCurrent = () => {
+        const threshold = 112;
+        let current = headings[0];
+        for (const heading of headings) {
+          if (heading.getBoundingClientRect().top <= threshold) current = heading;
+          else break;
+        }
+        if (current) setCurrent(current.id);
+      };
+
+      links.forEach((link) => {
+        link.addEventListener("click", () => {
+          setCurrent(decodeURIComponent(link.hash.slice(1)));
+          link.closest<HTMLDetailsElement>(".mobile-toc")?.removeAttribute("open");
+        });
+      });
+
+      updateCurrent();
+      document.addEventListener("scroll", updateCurrent, { passive: true });
     };
 
     const setupImageViewer = () => {
@@ -115,6 +240,8 @@ const updated =
     };
 
     addCopyButtons();
+    setupReadingTheme();
+    setupTableOfContents();
     setupImageViewer();
     renderDiagrams();
   </script>
