@@ -1,0 +1,121 @@
+---
+import type { Article } from "../lib/articles";
+import { formatDate } from "../lib/articles";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const updated =
+  article.data.updated.valueOf() !== article.data.date.valueOf()
+    ? formatDate(article.data.updated)
+    : null;
+---
+
+<BaseLayout
+  title={article.data.title}
+  description={article.data.summary}
+  type="article"
+>
+  <article class="article-shell">
+    <header class="article-header">
+      <a class="back-link" href="/articles/">← 全部文章</a>
+      <h1>{article.data.title}</h1>
+      <div class="article-meta">
+        <time datetime={article.data.date.toISOString()}>
+          发布于 {formatDate(article.data.date)}
+        </time>
+        {updated && <span>更新于 {updated}</span>}
+      </div>
+      <ul class="tag-list" aria-label="文章标签">
+        {article.data.tags.map((tag) => <li>{tag}</li>)}
+      </ul>
+    </header>
+
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+
+  <dialog class="image-viewer" aria-label="图片查看器">
+    <button type="button" aria-label="关闭图片查看器">关闭</button>
+    <img alt="" />
+  </dialog>
+
+  <script>
+    const addCopyButtons = () => {
+      document.querySelectorAll<HTMLElement>(".prose pre").forEach((block) => {
+        if (block.classList.contains("mermaid") || block.querySelector(".copy-code")) {
+          return;
+        }
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "copy-code";
+        button.textContent = "复制";
+        button.setAttribute("aria-label", "复制代码");
+        button.addEventListener("click", async () => {
+          const code = block.querySelector("code")?.textContent || "";
+          await navigator.clipboard.writeText(code);
+          button.textContent = "已复制";
+          window.setTimeout(() => {
+            button.textContent = "复制";
+          }, 1500);
+        });
+        block.append(button);
+      });
+    };
+
+    const setupImageViewer = () => {
+      const dialog = document.querySelector<HTMLDialogElement>(".image-viewer");
+      const viewerImage = dialog?.querySelector<HTMLImageElement>("img");
+      const closeButton = dialog?.querySelector<HTMLButtonElement>("button");
+
+      document.querySelectorAll<HTMLImageElement>(".prose img").forEach((image) => {
+        image.tabIndex = 0;
+        image.setAttribute("role", "button");
+        image.setAttribute("aria-label", `${image.alt || "文章图片"}，点击查看大图`);
+
+        const open = () => {
+          if (!dialog || !viewerImage) return;
+          viewerImage.src = image.currentSrc || image.src;
+          viewerImage.alt = image.alt;
+          dialog.showModal();
+        };
+
+        image.addEventListener("click", open);
+        image.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            open();
+          }
+        });
+      });
+
+      closeButton?.addEventListener("click", () => dialog?.close());
+      dialog?.addEventListener("click", (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+    };
+
+    const renderDiagrams = async () => {
+      const diagrams = document.querySelectorAll<HTMLElement>(".mermaid");
+      if (diagrams.length === 0) return;
+
+      const { default: mermaid } = await import("mermaid");
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: "neutral",
+        securityLevel: "strict",
+        fontFamily: "inherit",
+      });
+      await mermaid.run({ nodes: diagrams });
+    };
+
+    addCopyButtons();
+    setupImageViewer();
+    renderDiagrams();
+  </script>
+</BaseLayout>
