@@ -54,7 +54,7 @@
 
 :root[data-reading-theme="notion"] .article-page {
   color-scheme: light;
-  --md-background: #ffffff;
+  --md-background: #f7f7f4;
   --md-text: #37352f;
   --md-muted: #73726e;
   --md-border: #e9e9e7;
@@ -74,7 +74,7 @@
 
 :root[data-theme="dark"][data-reading-theme="notion"] .article-page {
   color-scheme: dark;
-  --md-background: #2f3437;
+  --md-background: #111210;
   --md-text: #ebebeb;
   --md-muted: #b1b3b4;
   --md-border: #4b5053;

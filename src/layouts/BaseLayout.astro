@@ -55,9 +55,9 @@ const socialImage = new URL("/og.png", SITE.url);
           : "light";
         document.documentElement.dataset.theme = saved || preferred;
 
-        const readingTheme = localStorage.getItem("reading-theme");
+        const readingTheme =
+          localStorage.getItem("reading-theme") || "notion";
         if (
-          readingTheme &&
           [
             "github",
             "notion",

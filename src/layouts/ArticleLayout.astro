@@ -32,8 +32,8 @@ const tocHeadings = headings.filter(
           <label class="reading-theme-picker">
             <span>阅读主题</span>
             <select aria-label="选择文章阅读主题">
-              <option value="github">GitHub</option>
               <option value="notion">Notion</option>
+              <option value="github">GitHub</option>
               <option value="newsprint">Newsprint</option>
               <option value="academic">Academic</option>
               <option value="minimal">Minimal</option>
@@ -137,18 +137,13 @@ const tocHeadings = headings.filter(
         "sepia",
         "night",
       ];
-      const current = document.documentElement.dataset.readingTheme || "github";
-      select.value = allowed.includes(current) ? current : "github";
+      const current = document.documentElement.dataset.readingTheme || "notion";
+      select.value = allowed.includes(current) ? current : "notion";
 
       select.addEventListener("change", () => {
-        const theme = allowed.includes(select.value) ? select.value : "github";
-        if (theme === "github") {
-          delete document.documentElement.dataset.readingTheme;
-          localStorage.removeItem("reading-theme");
-        } else {
-          document.documentElement.dataset.readingTheme = theme;
-          localStorage.setItem("reading-theme", theme);
-        }
+        const theme = allowed.includes(select.value) ? select.value : "notion";
+        document.documentElement.dataset.readingTheme = theme;
+        localStorage.setItem("reading-theme", theme);
       });
     };
 
