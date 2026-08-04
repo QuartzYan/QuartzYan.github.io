@@ -1,0 +1,40 @@
+---
+import ArticleCard from "../../components/ArticleCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPublishedArticles } from "../../lib/articles";
+
+const articles = await getPublishedArticles();
+const groupedArticles = articles.reduce((groups, article) => {
+  const year = article.data.date.getFullYear().toString();
+  const yearArticles = groups.get(year) || [];
+  yearArticles.push(article);
+  groups.set(year, yearArticles);
+  return groups;
+}, new Map<string, typeof articles>());
+const groups = [...groupedArticles.entries()].sort(
+  ([left], [right]) => Number(right) - Number(left),
+);
+---
+
+<BaseLayout title="全部文章" description="QuartzYan 的全部技术文章。">
+  <section class="page-shell">
+    <header class="page-heading compact">
+      <p class="eyebrow">Archive</p>
+      <h1>全部文章</h1>
+      <p>共 {articles.length} 篇公开文章。</p>
+    </header>
+
+    <div class="year-groups">
+      {
+        groups.map(([year, yearArticles]) => (
+          <section class="year-group">
+            <h2>{year}</h2>
+            <div class="article-list">
+              {yearArticles.map((article) => <ArticleCard article={article} />)}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

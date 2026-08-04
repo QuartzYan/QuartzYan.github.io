@@ -1,0 +1,96 @@
+name: Build and deploy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/deploy.yml"
+      - "public/**"
+      - "scripts/**"
+      - "src/**"
+      - "astro.config.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+  workflow_dispatch:
+    inputs:
+      content_ref:
+        description: QuartzNote branch, tag, or commit to publish
+        required: false
+        default: master
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out website
+        uses: actions/checkout@v6
+        with:
+          path: site
+          persist-credentials: false
+
+      - name: Create short-lived content token
+        id: content-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.QUARTZNOTE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.QUARTZNOTE_APP_PRIVATE_KEY }}
+          owner: QuartzYan
+          repositories: QuartzNote
+          permission-contents: read
+
+      - name: Check out QuartzNote
+        uses: actions/checkout@v6
+        with:
+          repository: QuartzYan/QuartzNote
+          ref: ${{ inputs.content_ref || 'master' }}
+          token: ${{ steps.content-token.outputs.token }}
+          path: content
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Build website
+        working-directory: site
+        env:
+          CONTENT_DIR: ../content
+        run: npm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
