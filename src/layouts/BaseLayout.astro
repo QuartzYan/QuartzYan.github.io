@@ -58,9 +58,15 @@ const socialImage = new URL("/og.png", SITE.url);
         const readingTheme = localStorage.getItem("reading-theme");
         if (
           readingTheme &&
-          ["github", "newsprint", "academic", "minimal", "sepia", "night"].includes(
-            readingTheme,
-          )
+          [
+            "github",
+            "notion",
+            "newsprint",
+            "academic",
+            "minimal",
+            "sepia",
+            "night",
+          ].includes(readingTheme)
         ) {
           document.documentElement.dataset.readingTheme = readingTheme;
         }
