@@ -52,6 +52,39 @@
   --md-link: #78a9dc;
 }
 
+:root[data-reading-theme="notion"] .article-page {
+  color-scheme: light;
+  --md-background: #f7f7f4;
+  --md-text: #37352f;
+  --md-muted: #73726e;
+  --md-border: #e9e9e7;
+  --md-code-background: #f7f6f3;
+  --md-table-stripe: #f7f7f7;
+  --md-link: #37352f;
+  --md-font:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    "Apple Color Emoji", Arial, "Noto Sans SC", "PingFang SC",
+    "Microsoft YaHei", sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  --md-heading-font: var(--md-font);
+  --md-content-width: 53.75rem;
+  --md-line-height: 1.6;
+  --notion-quote-background: #f7f7f7;
+  --notion-inline-code: #9a6e3a;
+}
+
+:root[data-theme="dark"][data-reading-theme="notion"] .article-page {
+  color-scheme: dark;
+  --md-background: #111210;
+  --md-text: #ebebeb;
+  --md-muted: #b1b3b4;
+  --md-border: #4b5053;
+  --md-code-background: #3f4447;
+  --md-table-stripe: #393c3f;
+  --md-link: #ebebeb;
+  --notion-quote-background: #3c4144;
+  --notion-inline-code: #d8b486;
+}
+
 :root[data-reading-theme="newsprint"] .article-page {
   --md-background: #fbf8f1;
   --md-text: #2b2925;
@@ -735,6 +768,108 @@ main {
   border-radius: 3px;
   background: #ffffff;
   text-align: center;
+}
+
+:root[data-reading-theme="notion"] .article-header h1,
+:root[data-reading-theme="notion"] .prose h2 {
+  border-bottom: 0;
+}
+
+:root[data-reading-theme="notion"] .article-header h1 {
+  padding-bottom: 0.3em;
+  font-size: clamp(2rem, 5vw, 2.2rem);
+  line-height: 1.3;
+}
+
+:root[data-reading-theme="notion"] .prose h2,
+:root[data-reading-theme="notion"] .prose h3,
+:root[data-reading-theme="notion"] .prose h4 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0;
+}
+
+:root[data-reading-theme="notion"] .prose h2 {
+  font-size: 1.75em;
+  line-height: 1.225;
+}
+
+:root[data-reading-theme="notion"] .prose h3 {
+  font-size: 1.4em;
+  line-height: 1.43;
+}
+
+:root[data-reading-theme="notion"] .prose h4 {
+  font-size: 1.2em;
+}
+
+:root[data-reading-theme="notion"] .prose a {
+  color: var(--md-link);
+  border-bottom: 0.05em solid currentColor;
+  text-decoration: none;
+  transition: opacity 100ms ease;
+}
+
+:root[data-reading-theme="notion"] .prose a:hover {
+  opacity: 0.72;
+}
+
+:root[data-reading-theme="notion"] .prose h2 a,
+:root[data-reading-theme="notion"] .prose h3 a,
+:root[data-reading-theme="notion"] .prose h4 a {
+  border-bottom: 0;
+}
+
+:root[data-reading-theme="notion"] .prose blockquote {
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--md-text);
+  background: var(--notion-quote-background);
+  color: var(--md-text);
+}
+
+:root[data-reading-theme="notion"] .prose code:not(pre code) {
+  padding: 0.125rem 0.25rem;
+  border: 0;
+  border-radius: 3px;
+  background: var(--md-code-background);
+  color: var(--notion-inline-code);
+}
+
+:root[data-reading-theme="notion"] .prose pre {
+  padding: 1rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--md-code-background);
+  font-family:
+    "SF Mono", "Fira Code", Cousine, Consolas, "Noto Sans Mono CJK SC",
+    monospace;
+}
+
+:root[data-reading-theme="notion"] .prose pre.astro-code {
+  background-color: var(--md-code-background) !important;
+}
+
+:root[data-reading-theme="notion"] .prose pre.astro-code span {
+  background-color: transparent !important;
+}
+
+:root[data-reading-theme="notion"] .prose img {
+  border: 0;
+  border-radius: 4px;
+}
+
+:root[data-reading-theme="notion"] .prose th {
+  background: var(--notion-quote-background);
+}
+
+:root[data-reading-theme="notion"] .prose hr {
+  border-top: 1.5px solid var(--md-text);
+}
+
+:root[data-reading-theme="notion"] .article-page .tag-list li {
+  border-color: transparent;
+  border-radius: 3px;
+  background: var(--md-code-background);
 }
 
 .article-toc {

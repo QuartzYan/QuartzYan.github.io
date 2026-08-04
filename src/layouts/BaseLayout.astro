@@ -55,12 +55,18 @@ const socialImage = new URL("/og.png", SITE.url);
           : "light";
         document.documentElement.dataset.theme = saved || preferred;
 
-        const readingTheme = localStorage.getItem("reading-theme");
+        const readingTheme =
+          localStorage.getItem("reading-theme") || "notion";
         if (
-          readingTheme &&
-          ["github", "newsprint", "academic", "minimal", "sepia", "night"].includes(
-            readingTheme,
-          )
+          [
+            "github",
+            "notion",
+            "newsprint",
+            "academic",
+            "minimal",
+            "sepia",
+            "night",
+          ].includes(readingTheme)
         ) {
           document.documentElement.dataset.readingTheme = readingTheme;
         }
