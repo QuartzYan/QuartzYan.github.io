@@ -9,6 +9,7 @@ const articles = defineCollection({
     title: z.string(),
     slug: z.string(),
     date: z.coerce.date(),
+    publishedAt: z.coerce.date().optional(),
     updated: z.coerce.date(),
     status: z.enum(["draft", "published", "archived"]),
     tags: z.array(z.string()),
