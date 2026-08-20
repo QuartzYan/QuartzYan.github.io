@@ -720,7 +720,7 @@ main {
   max-width: 100%;
   height: auto;
   margin: 1.25rem auto;
-  border: 1px solid var(--md-border);
+  border: 0;
   border-radius: 3px;
   cursor: zoom-in;
 }
@@ -867,7 +867,6 @@ main {
 }
 
 :root[data-reading-theme="notion"] .prose img {
-  border: 0;
   border-radius: 4px;
 }
 
